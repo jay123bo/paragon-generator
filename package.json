@@ -1,23 +1,18 @@
 {
-  "name": "paragon-generator-fixed",
+  "name": "paragon-generator-simple",
   "version": "1.0.0",
-  "description": "Secure backend with simple login (no OAuth complexity)",
+  "description": "Simple backend - Roblox username login only",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "node index.js"
   },
-  "keywords": ["roblox", "ai", "generator", "secure"],
+  "keywords": ["roblox", "ai", "generator"],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "express-session": "^1.17.3",
-    "express-rate-limit": "^7.1.5",
-    "helmet": "^7.1.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
+    "express-rate-limit": "^7.1.5"
   }
 }
