@@ -1,0 +1,480 @@
+const express = require("express");
+const cors = require("cors");
+const session = require("express-session");
+const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const crypto = require("crypto");
+
+const app = express();
+
+// ============================================
+// SECURITY MIDDLEWARE
+// ============================================
+
+// Helmet for security headers - FIXED CONFIGURATION
+app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: false
+}));
+
+// CORS configuration - ALLOW ALL ORIGINS FOR DEVELOPMENT
+app.use(cors({
+    origin: true, // Allow all origins in development
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Rate limiting - prevent DDoS attacks
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 100,
+    message: "Too many requests from this IP, please try again later."
+});
+
+const generateLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 10, // Increased for testing
+    message: "Too many generation requests. Please wait a minute."
+});
+
+app.use("/api/", limiter);
+
+// Body parsing
+app.use(express.json({ limit: "10kb" }));
+app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
+// Session management - FIXED
+app.use(session({
+    secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex"),
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        secure: false, // Allow HTTP for development
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'lax'
+    }
+}));
+
+// ============================================
+// DATA STORAGE (In-memory)
+// ============================================
+
+const users = new Map();
+const userProjects = new Map();
+const chatHistories = new Map();
+
+// Create a default test user
+const TEST_USER_ID = "test_user_001";
+users.set(TEST_USER_ID, {
+    username: "TestUser",
+    password: "password123", // Simple password for testing
+    robloxId: "123456789",
+    createdAt: new Date()
+});
+
+// ============================================
+// MIDDLEWARE: AUTH CHECK
+// ============================================
+
+function requireAuth(req, res, next) {
+    if (!req.session.userId) {
+        return res.status(401).json({
+            error: "Authentication required",
+            message: "Please log in first"
+        });
+    }
+    next();
+}
+
+// ============================================
+// INPUT VALIDATION
+// ============================================
+
+function sanitizeInput(input) {
+    if (typeof input !== "string") return "";
+    return input
+        .replace(/[<>]/g, "")
+        .replace(/javascript:/gi, "")
+        .replace(/on\w+=/gi, "")
+        .trim()
+        .substring(0, 5000);
+}
+
+function validateProjectInput(name, prompt) {
+    if (!name || typeof name !== "string") {
+        throw new Error("Invalid project name");
+    }
+    if (!prompt || typeof prompt !== "string") {
+        throw new Error("Invalid project description");
+    }
+    if (name.length > 100) {
+        throw new Error("Project name too long (max 100 characters)");
+    }
+    if (prompt.length > 2000) {
+        throw new Error("Description too long (max 2000 characters)");
+    }
+    return true;
+}
+
+// ============================================
+// SIMPLE AUTH ROUTES (No OAuth)
+// ============================================
+
+// Simple login endpoint
+app.post("/api/auth/login", (req, res) => {
+    const { username, password } = req.body;
+    
+    console.log("Login attempt:", username);
+    
+    // Find user
+    let foundUser = null;
+    let foundUserId = null;
+    
+    for (const [userId, user] of users.entries()) {
+        if (user.username === username && user.password === password) {
+            foundUser = user;
+            foundUserId = userId;
+            break;
+        }
+    }
+    
+    if (!foundUser) {
+        return res.status(401).json({
+            error: "Invalid credentials",
+            message: "Wrong username or password"
+        });
+    }
+    
+    // Create session
+    req.session.userId = foundUserId;
+    req.session.username = foundUser.username;
+    
+    console.log("✅ Login successful:", username);
+    
+    res.json({
+        success: true,
+        username: foundUser.username,
+        robloxId: foundUser.robloxId
+    });
+});
+
+// Simple registration endpoint
+app.post("/api/auth/register", (req, res) => {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+        return res.status(400).json({
+            error: "Username and password required"
+        });
+    }
+    
+    if (username.length < 3) {
+        return res.status(400).json({
+            error: "Username must be at least 3 characters"
+        });
+    }
+    
+    if (password.length < 6) {
+        return res.status(400).json({
+            error: "Password must be at least 6 characters"
+        });
+    }
+    
+    // Check if username exists
+    for (const user of users.values()) {
+        if (user.username === username) {
+            return res.status(409).json({
+                error: "Username already exists"
+            });
+        }
+    }
+    
+    // Create new user
+    const userId = "user_" + Date.now();
+    users.set(userId, {
+        username: username,
+        password: password, // In production, hash this!
+        robloxId: Date.now().toString(),
+        createdAt: new Date()
+    });
+    
+    // Auto-login
+    req.session.userId = userId;
+    req.session.username = username;
+    
+    console.log("✅ New user registered:", username);
+    
+    res.json({
+        success: true,
+        username: username,
+        robloxId: users.get(userId).robloxId
+    });
+});
+
+// Logout
+app.post("/api/auth/logout", (req, res) => {
+    const username = req.session.username;
+    req.session.destroy();
+    console.log("👋 User logged out:", username);
+    res.json({ success: true });
+});
+
+// Check auth status
+app.get("/api/auth/status", (req, res) => {
+    if (req.session.userId) {
+        const user = users.get(req.session.userId);
+        if (user) {
+            res.json({
+                authenticated: true,
+                username: user.username,
+                robloxId: user.robloxId
+            });
+        } else {
+            res.json({ authenticated: false });
+        }
+    } else {
+        res.json({ authenticated: false });
+    }
+});
+
+// ============================================
+// AI GENERATION (Mock)
+// ============================================
+
+async function generateWithAI(prompt, userId) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const projectName = prompt.substring(0, 50).trim() || "Generated Project";
+    
+    const response = {
+        success: true,
+        message: `✨ I've created "${projectName}" for you! The plugin will build: folders, scripts, and basic structure based on your description.`,
+        buildInstructions: [
+            {
+                type: "Folder",
+                name: projectName,
+                parent: "ServerStorage"
+            },
+            {
+                type: "Script",
+                name: "MainScript",
+                parent: projectName,
+                source: `-- ${projectName}\n-- Generated by Paragon AI\n-- User prompt: ${prompt}\n\nprint("🚀 ${projectName} loaded!")\n\n-- TODO: Add your game logic here`
+            },
+            {
+                type: "Folder",
+                name: "Scripts",
+                parent: projectName
+            },
+            {
+                type: "Folder",
+                name: "Modules",
+                parent: projectName
+            },
+            {
+                type: "ModuleScript",
+                name: "Config",
+                parent: projectName,
+                source: `-- Configuration for ${projectName}\nlocal Config = {}\n\nConfig.ProjectName = "${projectName}"\nConfig.Version = "1.0.0"\n\nreturn Config`
+            }
+        ]
+    };
+    
+    // Save to chat history
+    const userHistory = chatHistories.get(userId) || [];
+    userHistory.push({
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        prompt: prompt,
+        response: response.message,
+        buildInstructions: response.buildInstructions
+    });
+    chatHistories.set(userId, userHistory);
+    
+    return response;
+}
+
+// ============================================
+// API ROUTES - PROTECTED
+// ============================================
+
+// Generate project
+app.post("/api/generate", requireAuth, generateLimiter, async (req, res) => {
+    try {
+        const { projectName, prompt } = req.body;
+        
+        validateProjectInput(projectName, prompt);
+        const cleanName = sanitizeInput(projectName);
+        const cleanPrompt = sanitizeInput(prompt);
+        
+        const user = users.get(req.session.userId);
+        console.log(`🤖 AI Generation: ${cleanName} (by ${user.username})`);
+        
+        const aiResponse = await generateWithAI(cleanPrompt, req.session.userId);
+        
+        const projectId = Date.now().toString();
+        const userProjectsList = userProjects.get(req.session.userId) || [];
+        
+        const project = {
+            id: projectId,
+            name: cleanName,
+            prompt: cleanPrompt,
+            buildInstructions: aiResponse.buildInstructions,
+            createdAt: new Date(),
+            userId: req.session.userId
+        };
+        
+        userProjectsList.push(project);
+        userProjects.set(req.session.userId, userProjectsList);
+        
+        req.session.lastProjectId = projectId;
+        
+        console.log(`✅ Project created: ${cleanName} (ID: ${projectId})`);
+        
+        res.json({
+            success: true,
+            message: "Project generated successfully!",
+            projectId: projectId,
+            projectName: cleanName,
+            aiResponse: aiResponse.message
+        });
+        
+    } catch (error) {
+        console.error("Generation error:", error);
+        res.status(400).json({
+            error: error.message || "Generation failed"
+        });
+    }
+});
+
+// Get instructions for plugin
+app.get("/api/instructions", requireAuth, (req, res) => {
+    const projectId = req.session.lastProjectId;
+    
+    if (!projectId) {
+        return res.status(404).json({
+            error: "No project found. Generate a project first."
+        });
+    }
+    
+    const userProjectsList = userProjects.get(req.session.userId) || [];
+    const project = userProjectsList.find(p => p.id === projectId);
+    
+    if (!project) {
+        return res.status(404).json({
+            error: "Project not found"
+        });
+    }
+    
+    console.log(`📦 Plugin fetching: ${project.name}`);
+    
+    res.json({
+        version: "1.0",
+        projectName: project.name,
+        prompt: project.prompt,
+        create: project.buildInstructions
+    });
+});
+
+// Get user's chat history
+app.get("/api/chat/history", requireAuth, (req, res) => {
+    const history = chatHistories.get(req.session.userId) || [];
+    res.json({
+        history: history.slice().reverse()
+    });
+});
+
+// Get user's projects
+app.get("/api/projects", requireAuth, (req, res) => {
+    const projects = userProjects.get(req.session.userId) || [];
+    res.json({
+        projects: projects.slice().reverse()
+    });
+});
+
+// Delete project
+app.delete("/api/projects/:id", requireAuth, (req, res) => {
+    const projectId = req.params.id;
+    const userProjectsList = userProjects.get(req.session.userId) || [];
+    
+    const filtered = userProjectsList.filter(p => p.id !== projectId);
+    userProjects.set(req.session.userId, filtered);
+    
+    console.log(`🗑️ Project deleted: ${projectId}`);
+    
+    res.json({ success: true });
+});
+
+// ============================================
+// HEALTH & STATUS
+// ============================================
+
+app.get("/", (req, res) => {
+    res.json({
+        service: "Paragon Generator API",
+        version: "1.0.0",
+        status: "online",
+        authenticated: !!req.session.userId,
+        totalUsers: users.size,
+        security: {
+            helmet: "enabled",
+            rateLimit: "enabled",
+            cors: "enabled",
+            sessions: "enabled"
+        }
+    });
+});
+
+app.get("/api/health", (req, res) => {
+    res.json({
+        status: "healthy",
+        uptime: process.uptime(),
+        timestamp: new Date(),
+        users: users.size
+    });
+});
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+
+app.use((req, res) => {
+    res.status(404).json({
+        error: "Endpoint not found"
+    });
+});
+
+app.use((err, req, res, next) => {
+    console.error("Error:", err);
+    res.status(500).json({
+        error: "Internal server error",
+        message: process.env.NODE_ENV === "development" ? err.message : undefined
+    });
+});
+
+// ============================================
+// START SERVER
+// ============================================
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`
+🚀 Paragon Generator API - SECURE MODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📡 Server: http://localhost:${PORT}
+🔒 Security: Enabled (Helmet + Rate Limiting)
+🔐 Auth: Simple Login (username/password)
+👤 Test Account: username="TestUser" password="password123"
+⚡ Ready to accept requests
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 Try it:
+   1. Open website: http://localhost:8080
+   2. Login with: TestUser / password123
+   3. Or register a new account!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    `);
+});
