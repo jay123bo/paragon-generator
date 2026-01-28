@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Paragon Generator - Making Roblox Easier</title>
+    <title>Paragon Generator</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
             background: #000;
             color: #fff;
             overflow-x: hidden;
@@ -36,11 +36,9 @@
         .opening-text {
             font-size: 64px;
             font-weight: 700;
-            letter-spacing: -2px;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
             opacity: 0;
             animation: textFadeIn 2s ease forwards;
         }
@@ -81,7 +79,6 @@
         .logo {
             font-size: 18px;
             font-weight: 600;
-            letter-spacing: -0.5px;
         }
 
         .nav-sections {
@@ -109,8 +106,8 @@
             font-size: 15px;
             font-weight: 500;
             transition: color 0.3s;
-            position: relative;
             cursor: pointer;
+            position: relative;
         }
 
         .nav-links a:hover,
@@ -156,11 +153,6 @@
             font-weight: 600;
         }
 
-        .user-name {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
         .login-button,
         .logout-button {
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
@@ -189,6 +181,91 @@
             display: block;
         }
 
+        /* Login Overlay */
+        .login-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .login-overlay.show {
+            display: flex;
+        }
+
+        .login-icon {
+            font-size: 80px;
+        }
+
+        .login-title {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .login-subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            max-width: 500px;
+        }
+
+        .login-box {
+            background: rgba(255,255,255,0.05);
+            padding: 40px;
+            border-radius: 20px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.5);
+            color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+            margin-bottom: 20px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .submit-button {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: #fff;
+            padding: 16px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         /* Main Content */
         main {
             margin-top: 80px;
@@ -210,61 +287,7 @@
             display: block;
         }
 
-        /* Login Required Overlay */
-        .login-required {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 999;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 30px;
-        }
-
-        .login-required.show {
-            display: flex;
-        }
-
-        .login-required-icon {
-            font-size: 80px;
-        }
-
-        .login-required-title {
-            font-size: 36px;
-            font-weight: 700;
-        }
-
-        .login-required-text {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.6);
-            text-align: center;
-            max-width: 500px;
-        }
-
-        .login-required-button {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: #fff;
-            padding: 16px 40px;
-            border: none;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 20px;
-        }
-
-        .login-required-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 50px rgba(59, 130, 246, 0.5);
-        }
-
-        /* AI Generator Section */
+        /* Generator Section */
         .ai-generator {
             max-width: 1200px;
             margin: 0 auto;
@@ -353,13 +376,11 @@
             color: #fff;
             font-size: 15px;
             font-family: inherit;
-            transition: all 0.3s;
         }
 
         .chat-input:focus {
             outline: none;
             border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
         .send-button {
@@ -372,7 +393,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
-            white-space: nowrap;
         }
 
         .send-button:hover:not(:disabled) {
@@ -382,7 +402,6 @@
 
         .send-button:disabled {
             opacity: 0.5;
-            cursor: not-allowed;
         }
 
         /* Projects Section */
@@ -400,21 +419,12 @@
             border-radius: 20px;
             padding: 30px;
             transition: all 0.4s;
-            cursor: pointer;
-            position: relative;
         }
 
         .project-card:hover {
             transform: translateY(-5px);
             border-color: rgba(59, 130, 246, 0.5);
             box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
-        }
-
-        .project-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 15px;
         }
 
         .project-title {
@@ -426,6 +436,7 @@
         .project-date {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
         }
 
         .project-prompt {
@@ -433,34 +444,22 @@
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 20px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-        }
-
-        .project-actions {
-            display: flex;
-            gap: 10px;
         }
 
         .project-button {
-            flex: 1;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
-            padding: 10px;
+            padding: 10px 20px;
             border-radius: 8px;
             font-size: 13px;
-            font-weight: 500;
             cursor: pointer;
             transition: all 0.3s;
+            margin-right: 10px;
         }
 
         .project-button:hover {
             background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(59, 130, 246, 0.5);
         }
 
         .delete-button {
@@ -470,7 +469,6 @@
 
         .delete-button:hover {
             background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
         }
 
         .empty-state {
@@ -479,17 +477,6 @@
             color: rgba(255, 255, 255, 0.5);
         }
 
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.3;
-        }
-
-        .empty-text {
-            font-size: 20px;
-        }
-
-        /* Loading Spinner */
         .loading {
             display: inline-block;
             width: 20px;
@@ -504,7 +491,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Success Toast */
         .toast {
             position: fixed;
             bottom: 30px;
@@ -515,63 +501,17 @@
             border-radius: 12px;
             box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
             display: none;
-            align-items: center;
-            gap: 12px;
             z-index: 10000;
+        }
+
+        .toast.show {
+            display: block;
             animation: slideUp 0.3s ease;
         }
 
         @keyframes slideUp {
             from { transform: translateY(100px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
-        }
-
-        .toast.show {
-            display: flex;
-        }
-
-        .toast-icon {
-            font-size: 24px;
-        }
-
-        .toast-message {
-            font-size: 15px;
-            font-weight: 500;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .opening-text {
-                font-size: 40px;
-            }
-
-            nav {
-                padding: 20px 30px;
-            }
-
-            .nav-sections {
-                gap: 20px;
-            }
-
-            .nav-label {
-                display: none;
-            }
-
-            .section {
-                padding: 80px 30px;
-            }
-
-            .generator-title {
-                font-size: 48px;
-            }
-
-            .projects-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .chat-message {
-                max-width: 90%;
-            }
         }
     </style>
 </head>
@@ -581,40 +521,23 @@
         <div class="opening-text">Making Roblox Easier</div>
     </div>
 
-    <!-- Login Required Overlay -->
-    <div class="login-required" id="loginRequired">
-        <div class="login-required-icon">🔒</div>
-        <h2 class="login-required-title">Login Required</h2>
-        <p class="login-required-text">
-            Please log in to use the AI Generator and access your projects.
-        </p>
+    <!-- Login Overlay -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-icon">🎮</div>
+        <h2 class="login-title">Welcome to Paragon</h2>
+        <p class="login-subtitle">Enter your Roblox username to get started</p>
         
-        <!-- Login/Register Form -->
-        <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px; width: 400px; max-width: 90%;">
-            <div id="loginForm">
-                <input type="text" id="loginUsername" placeholder="Username" style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; margin-bottom: 15px; font-family: inherit;">
-                <input type="password" id="loginPassword" placeholder="Password" style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; margin-bottom: 20px; font-family: inherit;">
-                <button class="login-required-button" onclick="loginSubmit()" style="width: 100%;">
-                    Login
-                </button>
-                <p style="text-align: center; margin-top: 20px; color: rgba(255,255,255,0.6); font-size: 14px;">
-                    Don't have an account? <a href="#" onclick="showRegisterForm(); return false;" style="color: #3b82f6; text-decoration: none;">Register</a>
-                </p>
-                <p style="text-align: center; margin-top: 10px; color: rgba(255,255,255,0.5); font-size: 13px;">
-                    Test account: <strong>TestUser</strong> / <strong>password123</strong>
-                </p>
-            </div>
-            
-            <div id="registerForm" style="display: none;">
-                <input type="text" id="registerUsername" placeholder="Choose Username" style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; margin-bottom: 15px; font-family: inherit;">
-                <input type="password" id="registerPassword" placeholder="Choose Password (6+ chars)" style="width: 100%; padding: 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; font-size: 15px; margin-bottom: 20px; font-family: inherit;">
-                <button class="login-required-button" onclick="registerSubmit()" style="width: 100%;">
-                    Create Account
-                </button>
-                <p style="text-align: center; margin-top: 20px; color: rgba(255,255,255,0.6); font-size: 14px;">
-                    Already have an account? <a href="#" onclick="showLoginForm(); return false;" style="color: #3b82f6; text-decoration: none;">Login</a>
-                </p>
-            </div>
+        <div class="login-box">
+            <input 
+                type="text" 
+                id="robloxUsername" 
+                class="input-field" 
+                placeholder="Your Roblox Username"
+                onkeypress="if(event.key==='Enter') loginUser()"
+            >
+            <button class="submit-button" onclick="loginUser()">
+                Continue
+            </button>
         </div>
     </div>
 
@@ -624,15 +547,15 @@
         <div class="nav-sections">
             <span class="nav-label">Generator</span>
             <div class="nav-links">
-                <a href="#generator" class="nav-link active" data-section="generator" onclick="switchTab('generator')">Generator</a>
-                <a href="#projects" class="nav-link" data-section="projects" onclick="switchTab('projects')">Projects</a>
+                <a class="nav-link active" onclick="switchTab('generator')">Generator</a>
+                <a class="nav-link" onclick="switchTab('projects')">Projects</a>
             </div>
         </div>
         <div class="user-section">
-            <button class="login-button" onclick="showLoginOverlay()">Login</button>
+            <button class="login-button" onclick="showLogin()">Login</button>
             <div class="user-info">
                 <div class="user-avatar" id="userAvatar"></div>
-                <span class="user-name" id="userName"></span>
+                <span id="userName"></span>
             </div>
             <button class="logout-button" onclick="logout()">Logout</button>
         </div>
@@ -643,15 +566,15 @@
         <!-- Generator Section -->
         <section id="generator" class="section ai-generator active">
             <h1 class="generator-title">AI Generator</h1>
-            <p class="generator-subtitle">Describe what you want to build and let AI create it for you</p>
+            <p class="generator-subtitle">Describe what you want to build</p>
 
             <div class="ai-chat-container">
                 <div class="chat-messages" id="chatMessages">
                     <div class="chat-message ai">
                         <div class="message-content">
-                            👋 Hello! I'm your AI assistant. Describe the Roblox game or system you want to create, and I'll generate it for you!
+                            👋 Hello! Describe the Roblox game or system you want to create!
                             <br><br>
-                            For example: "Create a racing game with power-ups and lap tracking"
+                            Example: "Create a racing game with power-ups and lap tracking"
                         </div>
                     </div>
                 </div>
@@ -661,7 +584,7 @@
                         type="text" 
                         class="chat-input" 
                         id="chatInput"
-                        placeholder="Describe your game or system..."
+                        placeholder="Describe your game..."
                         onkeypress="if(event.key==='Enter') sendMessage()"
                     >
                     <button class="send-button" id="sendButton" onclick="sendMessage()">
@@ -674,87 +597,29 @@
         <!-- Projects Section -->
         <section id="projects" class="section">
             <h1 class="generator-title">Your Projects</h1>
-            <p class="generator-subtitle">View and manage your AI-generated projects</p>
+            <p class="generator-subtitle">All your AI-generated projects</p>
 
-            <div class="projects-grid" id="projectsGrid">
-                <!-- Projects will be loaded here -->
-            </div>
+            <div class="projects-grid" id="projectsGrid"></div>
         </section>
     </main>
 
-    <!-- Success Toast -->
-    <div class="toast" id="toast">
-        <span class="toast-icon">✅</span>
-        <span class="toast-message" id="toastMessage"></span>
-    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
     <script>
         const API_URL = 'http://localhost:3000';
         let isAuthenticated = false;
         let currentUser = null;
 
-        // Show/hide login forms
-        function showLoginForm() {
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('registerForm').style.display = 'none';
+        function showLogin() {
+            document.getElementById('loginOverlay').classList.add('show');
         }
 
-        function showRegisterForm() {
-            document.getElementById('loginForm').style.display = 'none';
-            document.getElementById('registerForm').style.display = 'block';
-        }
-
-        function showLoginOverlay() {
-            document.getElementById('loginRequired').classList.add('show');
-            showLoginForm();
-        }
-
-        // Login submit
-        async function loginSubmit() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!username || !password) {
-                alert('Please enter username and password');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_URL}/api/auth/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    isAuthenticated = true;
-                    currentUser = data;
-                    updateUIForAuthState(true);
-                    document.getElementById('loginRequired').classList.remove('show');
-                    showToast('Welcome back, ' + data.username + '!');
-                    
-                    // Clear form
-                    document.getElementById('loginUsername').value = '';
-                    document.getElementById('loginPassword').value = '';
-                } else {
-                    alert(data.message || 'Login failed');
-                }
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('Connection error! Make sure backend is running:\ncd backend-fixed && npm start');
-            }
-        }
-
-        // Register submit
-        async function registerSubmit() {
-            const username = document.getElementById('registerUsername').value.trim();
-            const password = document.getElementById('registerPassword').value;
-
-            if (!username || !password) {
-                alert('Please enter username and password');
+        async function loginUser() {
+            const username = document.getElementById('robloxUsername').value.trim();
+            
+            if (!username) {
+                alert('Please enter your Roblox username');
                 return;
             }
 
@@ -763,41 +628,32 @@
                 return;
             }
 
-            if (password.length < 6) {
-                alert('Password must be at least 6 characters');
-                return;
-            }
-
             try {
-                const response = await fetch(`${API_URL}/api/auth/register`, {
+                const response = await fetch(`${API_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ robloxUsername: username })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
                     isAuthenticated = true;
-                    currentUser = data;
-                    updateUIForAuthState(true);
-                    document.getElementById('loginRequired').classList.remove('show');
-                    showToast('Account created! Welcome, ' + data.username + '!');
-                    
-                    // Clear form
-                    document.getElementById('registerUsername').value = '';
-                    document.getElementById('registerPassword').value = '';
+                    currentUser = { robloxUsername: data.robloxUsername };
+                    updateUI(true);
+                    document.getElementById('loginOverlay').classList.remove('show');
+                    document.getElementById('robloxUsername').value = '';
+                    showToast('Welcome, ' + data.robloxUsername + '!');
                 } else {
-                    alert(data.error || 'Registration failed');
+                    alert(data.error || 'Login failed');
                 }
             } catch (error) {
-                console.error('Register error:', error);
-                alert('Connection error! Make sure backend is running:\ncd backend-fixed && npm start');
+                console.error('Login error:', error);
+                alert('Connection error! Make sure backend is running:\ncd simple-backend && npm start');
             }
         }
 
-        // Check authentication status on load
         async function checkAuth() {
             try {
                 const response = await fetch(`${API_URL}/api/auth/status`, {
@@ -807,18 +663,18 @@
                 
                 if (data.authenticated) {
                     isAuthenticated = true;
-                    currentUser = data;
-                    updateUIForAuthState(true);
+                    currentUser = { robloxUsername: data.robloxUsername };
+                    updateUI(true);
                 } else {
-                    updateUIForAuthState(false);
+                    updateUI(false);
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
-                updateUIForAuthState(false);
+                updateUI(false);
             }
         }
 
-        function updateUIForAuthState(authenticated) {
+        function updateUI(authenticated) {
             const loginButton = document.querySelector('.login-button');
             const logoutButton = document.querySelector('.logout-button');
             const userInfo = document.querySelector('.user-info');
@@ -829,8 +685,8 @@
                 loginButton.style.display = 'none';
                 logoutButton.classList.add('logged-in');
                 userInfo.classList.add('logged-in');
-                userAvatar.textContent = currentUser.username[0].toUpperCase();
-                userName.textContent = currentUser.username;
+                userAvatar.textContent = currentUser.robloxUsername[0].toUpperCase();
+                userName.textContent = currentUser.robloxUsername;
             } else {
                 loginButton.style.display = 'block';
                 logoutButton.classList.remove('logged-in');
@@ -846,10 +702,8 @@
                 });
                 isAuthenticated = false;
                 currentUser = null;
-                updateUIForAuthState(false);
-                showToast('Logged out successfully');
-                
-                // Go back to generator tab if on projects
+                updateUI(false);
+                showToast('Logged out');
                 switchTab('generator');
             } catch (error) {
                 console.error('Logout failed:', error);
@@ -858,33 +712,28 @@
 
         function requireAuth() {
             if (!isAuthenticated) {
-                document.getElementById('loginRequired').classList.add('show');
+                showLogin();
                 return false;
             }
-            document.getElementById('loginRequired').classList.remove('show');
             return true;
         }
 
         function switchTab(tab) {
-            // Check auth for protected tabs
-            if (tab === 'generator' || tab === 'projects') {
-                if (!requireAuth()) return;
-            }
+            if (!requireAuth()) return;
 
-            // Update nav links
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.classList.remove('active');
             });
-            document.querySelector(`[data-section="${tab}"]`).classList.add('active');
-
-            // Update sections
             document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
-            document.getElementById(tab).classList.add('active');
 
-            // Load data for specific tabs
-            if (tab === 'projects') {
+            if (tab === 'generator') {
+                document.querySelector('.nav-link').classList.add('active');
+                document.getElementById('generator').classList.add('active');
+            } else if (tab === 'projects') {
+                document.querySelectorAll('.nav-link')[1].classList.add('active');
+                document.getElementById('projects').classList.add('active');
                 loadProjects();
             }
         }
@@ -894,17 +743,14 @@
 
             const input = document.getElementById('chatInput');
             const sendButton = document.getElementById('sendButton');
-            const messagesContainer = document.getElementById('chatMessages');
             
             const message = input.value.trim();
             if (!message) return;
 
-            // Disable input
             input.disabled = true;
             sendButton.disabled = true;
             sendButton.innerHTML = '<span class="loading"></span>';
 
-            // Add user message
             addMessage('user', message);
             input.value = '';
 
@@ -922,18 +768,16 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Add AI response
                     addMessage('ai', data.aiResponse);
                     showToast('Project generated! Open Studio and click Connect');
                 } else {
-                    addMessage('ai', `❌ ${data.error || 'Generation failed. Please try again.'}`);
+                    addMessage('ai', `❌ ${data.error || 'Generation failed'}`);
                 }
             } catch (error) {
-                console.error('Generation error:', error);
-                addMessage('ai', '❌ Connection error. Make sure the backend is running.');
+                console.error('Error:', error);
+                addMessage('ai', '❌ Connection error. Make sure backend is running.');
             }
 
-            // Re-enable input
             input.disabled = false;
             sendButton.disabled = false;
             sendButton.textContent = 'Generate';
@@ -945,8 +789,7 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat-message ${type}`;
             
-            const now = new Date();
-            const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            const time = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             
             messageDiv.innerHTML = `
                 <div class="message-content">${escapeHtml(content)}</div>
@@ -958,8 +801,6 @@
         }
 
         async function loadProjects() {
-            if (!requireAuth()) return;
-
             const projectsGrid = document.getElementById('projectsGrid');
             projectsGrid.innerHTML = '<div class="empty-state"><div class="loading"></div></div>';
 
@@ -970,67 +811,31 @@
                 const data = await response.json();
 
                 if (data.projects.length === 0) {
-                    projectsGrid.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📁</div>
-                            <div class="empty-text">No projects yet. Create your first project in the Generator!</div>
-                        </div>
-                    `;
+                    projectsGrid.innerHTML = '<div class="empty-state"><div style="font-size:64px;opacity:0.3">📁</div><div style="font-size:20px">No projects yet</div></div>';
                     return;
                 }
 
                 projectsGrid.innerHTML = '';
                 data.projects.forEach(project => {
-                    const card = createProjectCard(project);
+                    const date = new Date(project.createdAt).toLocaleDateString();
+                    const card = document.createElement('div');
+                    card.className = 'project-card';
+                    card.innerHTML = `
+                        <div class="project-title">${escapeHtml(project.name)}</div>
+                        <div class="project-date">${date}</div>
+                        <div class="project-prompt">${escapeHtml(project.prompt)}</div>
+                        <button class="project-button delete-button" onclick="deleteProject('${project.id}')">Delete</button>
+                    `;
                     projectsGrid.appendChild(card);
                 });
             } catch (error) {
                 console.error('Failed to load projects:', error);
-                projectsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">❌</div>
-                        <div class="empty-text">Failed to load projects</div>
-                    </div>
-                `;
+                projectsGrid.innerHTML = '<div class="empty-state">Failed to load projects</div>';
             }
         }
 
-        function createProjectCard(project) {
-            const card = document.createElement('div');
-            card.className = 'project-card';
-            
-            const date = new Date(project.createdAt);
-            const dateStr = date.toLocaleDateString('en-US', { 
-                month: 'short', 
-                day: 'numeric',
-                year: 'numeric'
-            });
-            
-            card.innerHTML = `
-                <div class="project-header">
-                    <div>
-                        <div class="project-title">${escapeHtml(project.name)}</div>
-                        <div class="project-date">${dateStr}</div>
-                    </div>
-                </div>
-                <div class="project-prompt">${escapeHtml(project.prompt)}</div>
-                <div class="project-actions">
-                    <button class="project-button" onclick="viewProject('${project.id}')">View Details</button>
-                    <button class="project-button delete-button" onclick="deleteProject('${project.id}')">Delete</button>
-                </div>
-            `;
-            
-            return card;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         async function deleteProject(projectId) {
-            if (!confirm('Are you sure you want to delete this project?')) return;
+            if (!confirm('Delete this project?')) return;
 
             try {
                 await fetch(`${API_URL}/api/projects/${projectId}`, {
@@ -1040,42 +845,27 @@
                 showToast('Project deleted');
                 loadProjects();
             } catch (error) {
-                console.error('Delete failed:', error);
                 alert('Failed to delete project');
             }
         }
 
-        function viewProject(projectId) {
-            showToast('Viewing project details...');
-            // You can expand this to show full project details
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function showToast(message) {
             const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
-            toastMessage.textContent = message;
+            toast.textContent = message;
             toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
+            setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // Allow Enter key to submit
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('loginPassword')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') loginSubmit();
-            });
-            document.getElementById('registerPassword')?.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') registerSubmit();
-            });
-        });
-
-        // Remove opening animation
         setTimeout(() => {
             document.querySelector('.opening-animation')?.remove();
         }, 4000);
 
-        // Initialize
         checkAuth();
     </script>
 </body>
