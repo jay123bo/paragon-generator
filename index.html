@@ -607,7 +607,11 @@
     <div class="toast" id="toast"></div>
 
     <script>
-        const API_URL = 'http://localhost:3000';
+        // AUTO-DETECT API URL (works for both localhost and deployed)
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://paragon-generator-api.vercel.app'; // Change this to your deployed backend URL
+        
         let isAuthenticated = false;
         let currentUser = null;
 
